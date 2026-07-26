@@ -140,12 +140,15 @@
   // ---- Rendering: step indicator ------------------------------------------
   function renderSteps() {
     stepIndicator.innerHTML = "";
+    var visibleNum = 0;
     STEPS.forEach(function (s, i) {
+      // Skip disabled steps entirely (e.g. Connectivity when the computer forces a modem type).
+      if (!isStepEnabled(s.key)) return;
+      visibleNum++;
       var li = document.createElement("li");
-      li.textContent = (i + 1) + ". " + s.label;
+      li.textContent = visibleNum + ". " + s.label;
       if (i === state.step) li.classList.add("active");
       else if (i < state.step) li.classList.add("done");
-      if (!isStepEnabled(s.key)) li.style.opacity = ".45";
       li.addEventListener("click", function () {
         if (i < state.step) { state.step = i; commit(); }
       });
