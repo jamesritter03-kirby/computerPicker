@@ -230,6 +230,9 @@
     } else {
       row.appendChild(extLink(mUrl, "\uD83E\uDDCA 3D model"));
     }
+    if (item.stepUrl) {
+      row.appendChild(downloadLink(item.stepUrl, "\u2B07 STEP"));
+    }
     var dsUrl = datasheetLink(item);
     if (isViewableDatasheet(dsUrl)) {
       row.appendChild(datasheetViewerLink(dsUrl, item.name, "\uD83D\uDCC4 Datasheet"));
@@ -275,6 +278,13 @@
     var a = document.createElement("a");
     a.href = href; a.target = "_blank"; a.rel = "noopener";
     a.className = "media-link"; a.textContent = text;
+    return a;
+  }
+  // A pill that downloads a file (e.g. the original STEP/CAD).
+  function downloadLink(href, text) {
+    var a = document.createElement("a");
+    a.href = href; a.className = "media-link"; a.setAttribute("download", "");
+    a.textContent = text;
     return a;
   }
 
@@ -572,6 +582,7 @@
       partNumber: item.partNumber || "", price: item.price,
       url: itemLink(item), imageUrl: imgs[0] || "",
       images: imgs, imagesUrl: imagesLink(item), modelUrl: modelLink(item),
+      stepUrl: item.stepUrl || "",
       datasheetUrl: datasheetLink(item),
       distQuery: distQueryFor(item),
       quantity: quantity, note: extraNote || item.notes || ""
@@ -857,6 +868,9 @@
         (isViewableModel(l.modelUrl)
           ? "<a class='media-link' href='#' data-view-model='" + escapeHtml(l.modelUrl) + "' data-view-title='" + escapeHtml(l.name) + "'>\uD83E\uDDCA View 3D</a>"
           : "<a class='media-link' href='" + escapeHtml(l.modelUrl) + "' target='_blank' rel='noopener'>\uD83E\uDDCA 3D model</a>") +
+        (l.stepUrl
+          ? "<a class='media-link' href='" + escapeHtml(l.stepUrl) + "' download>\u2B07 STEP</a>"
+          : "") +
         (isViewableDatasheet(l.datasheetUrl)
           ? "<a class='media-link' href='#' data-datasheet='" + escapeHtml(l.datasheetUrl) + "' data-datasheet-title='" + escapeHtml(l.name) + "'>\uD83D\uDCC4 Datasheet</a>"
           : "<a class='media-link' href='" + escapeHtml(l.datasheetUrl) + "' target='_blank' rel='noopener'>\uD83D\uDCC4 Datasheet</a>") +
