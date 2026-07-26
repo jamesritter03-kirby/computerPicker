@@ -42,7 +42,7 @@ window.DEFAULT_CATALOG = {
         "https://advdownload.advantech.com/productfile/PIS/EPC-R3720/Product%20-%20Photo(Main)-50/EPC-R3720_3D--_Banner2023020216170220230912174847.jpg",
         "https://advdownload.advantech.com/productfile/PIS/EPC-R3720/Product%20-%20Photo(B)/EPC-R3720_Front--_Banner20210804131446.jpg"
       ],
-      modelUrl: "models/advantech-epc-r3720/EPC-R3720.step",
+      modelUrl: "models/advantech-epc-r3720/EPC-R3720.glb",
       distQuery: "EPC-R3720",
       datasheetUrl: "datasheets/advantech-epc-r3720/EPC-R3720.pdf",
       supportsInternalModem: true,
@@ -64,7 +64,7 @@ window.DEFAULT_CATALOG = {
         "https://revolutionpi.com/shop/media/catalog/product/cache/332d2a2dded0683112bbb062b4d56370/r/e/revpi-connect-5.webp",
         "https://revolutionpi.com/shop/media/catalog/product/cache/332d2a2dded0683112bbb062b4d56370/r/e/revpi-connect-5-front.png"
       ],
-      modelUrl: "models/revpi-connect-5/revpi-connect-5.stp",
+      modelUrl: "models/revpi-connect-5/revpi-connect-5.glb",
       datasheetUrl: "datasheets/revpi-connect-5/revpi-connect-5.pdf",
       distQuery: "RevPi Connect 5",
       supportsInternalModem: false,
@@ -85,13 +85,14 @@ window.DEFAULT_CATALOG = {
         "https://media-cdn.seeedstudio.com/media/catalog/product/cache/bb49d3ec4ee05b6f018e93f896b8a25d/7/-/7-recomputer-industrail-r2000_2_3.jpg",
         "https://media-cdn.seeedstudio.com/media/catalog/product/cache/bb49d3ec4ee05b6f018e93f896b8a25d/1/0/10-recomputer-industrail-r2000_2_3.jpg"
       ],
-      modelUrl: "models/seeed-r2045/seeed-r2045.stp",
+      modelUrl: "models/seeed-r2045/seeed-r2045.glb",
       datasheetUrl: "datasheets/seeed-r2045/seeed-r2045.pdf",
       distQuery: "reComputer R2045-12",
       supportsInternalModem: true,
       internalModemFormFactor: "mPCIe",
       supportsSdCard: true,
       requiresSdCard: true,
+      forceModemType: "internal",
       notes: "Industrial edge computer."
     }
   ],
@@ -144,7 +145,7 @@ window.DEFAULT_CATALOG = {
         "https://mm.digikey.com/Volume0/opasdata/d220001/medias/images/2182/MFG_RV50X_1103052.jpg?hidebanner=true",
         "https://www.sierrawireless.com/wp-content/uploads/2022/02/2_RV50_550x550.png"
       ],
-      modelUrl: "models/sierra-rv50/rv50.stp",
+      modelUrl: "models/sierra-rv50/rv50.glb",
       distQuery: "RV50X",
       datasheetUrl: "https://www.sierrawireless.com/wp-content/uploads/2026/04/RV50X-Datasheet-March2026.pdf",
       notes: "Rugged industrial LTE HSPA+ router/gateway with Ethernet."
@@ -161,7 +162,7 @@ window.DEFAULT_CATALOG = {
         "https://www.digi.com/products/assets/digi-ix20/digi-ix20",
         "https://www.digi.com/products/assets/digi-ix20/digi-ix20-front"
       ],
-      modelUrl: "models/digi-ix20/ix20.step",
+      modelUrl: "models/digi-ix20/ix20.glb",
       datasheetUrl: "datasheets/digi-ix20/ix20.pdf",
       distQuery: "IX20-W0G4F",
       notes: "Compact industrial LTE cellular router with Ethernet."
@@ -177,7 +178,7 @@ window.DEFAULT_CATALOG = {
       partNumber: "PR1KCS28",
       price: null,
       imageUrl: "images/teltonika-pr1kcs28/PR1KCS28.png",
-      modelUrl: "models/teltonika-pr1kcs28/PR1KCS28.step",
+      modelUrl: "models/teltonika-pr1kcs28/PR1KCS28.glb",
       datasheetUrl: "datasheets/teltonika-pr1kcs28/PR1KCS28.pdf",
       distQuery: "PR1KCS28",
       notes: "Combo SISO Mobile/GNSS/Wi-Fi roof-mount SMA antenna for cellular modems / routers."
