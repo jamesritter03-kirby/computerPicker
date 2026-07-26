@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hardware Platform Configurator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div>
+        <h1>Hardware Platform Configurator</h1>
+        <p class="subtitle">Answer the questions to generate a purchasing list (bill of materials).</p>
+      </div>
+      <div class="header-actions">
+        <button id="btn-manage" class="btn btn-secondary" type="button">Manage / Add Options</button>
+        <button id="btn-reset" class="btn btn-ghost" type="button">Reset</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- WIZARD -->
+    <section class="wizard-panel">
+      <ol class="steps" id="step-indicator"></ol>
+      <div id="wizard-body" class="wizard-body"></div>
+      <div class="wizard-nav">
+        <button id="btn-back" class="btn btn-secondary" type="button">Back</button>
+        <button id="btn-next" class="btn btn-primary" type="button">Next</button>
+      </div>
+    </section>
+
+    <!-- LIVE BILL OF MATERIALS -->
+    <aside class="bom-panel">
+      <div class="bom-header">
+        <h2>Bill of Materials</h2>
+        <div class="qty-control">
+          <label for="system-qty">Systems</label>
+          <input id="system-qty" type="number" min="1" value="1" />
+        </div>
+      </div>
+      <div id="bom-list" class="bom-list"></div>
+      <div class="bom-footer">
+        <button id="btn-print" class="btn btn-secondary" type="button">Print / Save PDF</button>
+        <button id="btn-copy" class="btn btn-secondary" type="button">Copy as Text</button>
+        <button id="btn-csv" class="btn btn-primary" type="button">Download CSV</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- MANAGE / ADD OPTIONS MODAL -->
+  <div id="manage-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close="manage"></div>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Manage &amp; Add Options</h2>
+        <button class="modal-close" data-close="manage" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Add new components or remove custom ones. Custom items are saved in your browser and persist across sessions.</p>
+
+        <form id="add-form" class="add-form">
+          <div class="form-row">
+            <label>Category
+              <select id="f-category" required>
+                <option value="computers">Computer</option>
+                <option value="internalModems">Internal LTE Modem</option>
+                <option value="externalModems">External LTE Modem</option>
+                <option value="antennas">External Antenna</option>
+                <option value="routers">Router</option>
+                <option value="storage">Storage (SD card / drive)</option>
+                <option value="accessories">Accessory</option>
+              </select>
+            </label>
+            <label>Name *
+              <input id="f-name" type="text" placeholder="e.g. Advantech EPC-R3720" required />
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>Vendor
+              <input id="f-vendor" type="text" placeholder="e.g. Advantech" />
+            </label>
+            <label>Part number
+              <input id="f-part" type="text" placeholder="e.g. EPC-R3720" />
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>Vendor URL
+              <input id="f-url" type="url" placeholder="https://..." />
+            </label>
+            <label>Unit price (USD)
+              <input id="f-price" type="number" min="0" step="0.01" placeholder="optional" />
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label>Image URL
+              <input id="f-image" type="url" placeholder="https://... .jpg (optional)" />
+            </label>
+            <label>3D model URL
+              <input id="f-model" type="url" placeholder="https://... STEP/STL page (optional)" />
+            </label>
+          </div>
+
+          <!-- Computer-specific -->
+          <div class="form-row cat-only" data-cat="computers">
+            <label class="checkbox">
+              <input id="f-supports-modem" type="checkbox" checked /> Supports internal LTE modem
+            </label>
+            <label class="checkbox">
+              <input id="f-supports-sd" type="checkbox" checked /> Has SD card slot
+            </label>
+          </div>
+
+          <!-- Internal modem-specific -->
+          <div class="form-row cat-only" data-cat="internalModems">
+            <label>Antennas needed (bulkhead cables)
+              <input id="f-antennas" type="number" min="0" value="2" />
+            </label>
+            <label>Form factor
+              <input id="f-formfactor" type="text" placeholder="mPCIe / M.2" value="mPCIe" />
+            </label>
+          </div>
+
+          <label>Notes
+            <textarea id="f-notes" rows="2" placeholder="optional"></textarea>
+          </label>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Add option</button>
+          </div>
+        </form>
+
+        <h3>Existing options</h3>
+        <div id="manage-list" class="manage-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3D MODEL VIEWER MODAL -->
+  <div id="viewer-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close="viewer"></div>
+    <div class="modal-card viewer-card">
+      <div class="modal-head">
+        <h2 id="viewer-title">3D model</h2>
+        <div class="viewer-head-actions">
+          <a id="viewer-open" class="btn btn-secondary" href="#" target="_blank" rel="noopener">Open / Download</a>
+          <button class="modal-close" data-close="viewer" type="button" aria-label="Close">&times;</button>
+        </div>
+      </div>
+      <div class="viewer-body">
+        <div id="viewer-canvas"></div>
+        <div id="viewer-status" class="viewer-status hidden"></div>
+      </div>
+      <p class="hint viewer-hint">Rotate: drag &middot; Zoom: scroll &middot; Pan: right-drag. Large CAD files may take a few seconds to load. If it can&rsquo;t load, use &ldquo;Open / Download&rdquo;.</p>
+    </div>
+  </div>
+
+  <!-- IMAGE GALLERY MODAL -->
+  <div id="gallery-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close="gallery"></div>
+    <div class="modal-card gallery-card">
+      <div class="modal-head">
+        <h2 id="gallery-title">Pictures</h2>
+        <button class="modal-close" data-close="gallery" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="gallery-body">
+        <button id="gallery-prev" class="gallery-nav" type="button" aria-label="Previous">&#8249;</button>
+        <img id="gallery-main" alt="" />
+        <button id="gallery-next" class="gallery-nav" type="button" aria-label="Next">&#8250;</button>
+      </div>
+      <div id="gallery-thumbs" class="gallery-thumbs"></div>
+    </div>
+  </div>
+
+  <!-- DATASHEET (PDF) MODAL -->
+  <div id="datasheet-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close="datasheet"></div>
+    <div class="modal-card datasheet-card">
+      <div class="modal-head">
+        <h2 id="datasheet-title">Datasheet</h2>
+        <div class="viewer-head-actions">
+          <a id="datasheet-open" class="btn btn-secondary" href="#" target="_blank" rel="noopener">Open / Download</a>
+          <button class="modal-close" data-close="datasheet" type="button" aria-label="Close">&times;</button>
+        </div>
+      </div>
+      <div class="datasheet-body">
+        <div id="datasheet-frame">
+          <div id="datasheet-pages"></div>
+          <div id="datasheet-status" class="datasheet-status">Loading&hellip;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/online-3d-viewer@0.18.0/build/engine/o3dv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
