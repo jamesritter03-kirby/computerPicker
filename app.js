@@ -1037,6 +1037,11 @@
     if (cat === "computers") {
       item.supportsInternalModem = $("#f-supports-modem").checked;
       item.supportsSdCard = $("#f-supports-sd").checked;
+      item.requiresSdCard = $("#f-requires-sd").checked;
+      var forceModem = $("#f-force-modem").value;
+      if (forceModem) item.forceModemType = forceModem;
+      var internalFF = $("#f-internal-ff").value.trim();
+      if (internalFF) item.internalModemFormFactor = internalFF;
     }
     if (cat === "internalModems") {
       var a = parseInt($("#f-antennas").value, 10);
@@ -1095,6 +1100,96 @@
     renderManageList();
     renderAll();
     toast("Removed.");
+  }
+
+  // ---- Rules Matrix --------------------------------------------------------
+  // Global rules that the wizard enforces (independent of a single item).
+  var GLOBAL_RULES = [
+    "A computer that forces a modem type auto-selects that modem and skips the Connectivity step.",
+    "A computer that supports an internal modem (without forcing one) defaults to the internal modem.",
+    "A computer that requires an SD card auto-enables storage and pre-selects the first card.",
+    "A computer with no SD card slot skips the Storage step entirely.",
+    "An external modem always requires an external antenna (auto-selected).",
+    "Each internal modem adds antenna bulkhead cables equal to its antenna count (LTE + GPS = 2)."
+  ];
+
+  var matrixModal = $("#matrix-modal");
+  function openMatrix() { matrixModal.classList.remove("hidden"); renderMatrix(); }
+  function closeMatrix() { matrixModal.classList.add("hidden"); }
+  $("#btn-matrix").addEventListener("click", openMatrix);
+  document.querySelectorAll("[data-close='matrix']").forEach(function (el) {
+    el.addEventListener("click", closeMatrix);
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !matrixModal.classList.contains("hidden")) closeMatrix();
+  });
+
+  function ruleYes() { return "<span class='rule-yes'>\u2714 Yes</span>"; }
+  function ruleNo() { return "<span class='rule-no'>\u2014</span>"; }
+  function ruleYN(v) { return v ? ruleYes() : ruleNo(); }
+  function ruleBadge(text) { return "<span class='rule-badge'>" + escapeHtml(text) + "</span>"; }
+  function srcTag(it) {
+    return it._source === "custom"
+      ? "<span class='tag-custom'>custom</span>"
+      : "<span class='tag-default'>built-in</span>";
+  }
+
+  function renderMatrix() {
+    var host = $("#matrix-body");
+    var catalog = getCatalog();
+    var html = "";
+
+    // Global rules
+    html += "<div class='matrix-section'><h3 class='matrix-title'>Global rules</h3><ul class='rule-list'>";
+    GLOBAL_RULES.forEach(function (r) { html += "<li>" + escapeHtml(r) + "</li>"; });
+    html += "</ul></div>";
+
+    // Computers
+    html += "<div class='matrix-section'><h3 class='matrix-title'>Computers</h3><div class='matrix-scroll'>" +
+      "<table class='matrix'><thead><tr>" +
+      "<th>Computer</th><th>Internal&nbsp;modem</th><th>Forces&nbsp;modem</th>" +
+      "<th>SD&nbsp;slot</th><th>SD&nbsp;required</th><th>Modem&nbsp;form&nbsp;factor</th>" +
+      "</tr></thead><tbody>";
+    (catalog.computers || []).forEach(function (c) {
+      html += "<tr>" +
+        "<td class='mx-name'>" + escapeHtml(c.name) + srcTag(c) + "</td>" +
+        "<td>" + ruleYN(c.supportsInternalModem) + "</td>" +
+        "<td>" + (c.forceModemType ? ruleBadge(c.forceModemType) : ruleNo()) + "</td>" +
+        "<td>" + ruleYN(c.supportsSdCard) + "</td>" +
+        "<td>" + ruleYN(c.requiresSdCard) + "</td>" +
+        "<td>" + (c.internalModemFormFactor ? escapeHtml(c.internalModemFormFactor) : ruleNo()) + "</td>" +
+        "</tr>";
+    });
+    if (!(catalog.computers || []).length) html += "<tr><td colspan='6' class='mx-empty'>None yet.</td></tr>";
+    html += "</tbody></table></div></div>";
+
+    // Internal modems
+    html += "<div class='matrix-section'><h3 class='matrix-title'>Internal LTE modems</h3><div class='matrix-scroll'>" +
+      "<table class='matrix'><thead><tr>" +
+      "<th>Modem</th><th>Antennas&nbsp;(bulkhead&nbsp;cables)</th><th>Form&nbsp;factor</th>" +
+      "</tr></thead><tbody>";
+    (catalog.internalModems || []).forEach(function (m) {
+      html += "<tr>" +
+        "<td class='mx-name'>" + escapeHtml(m.name) + srcTag(m) + "</td>" +
+        "<td>" + (m.antennaCount != null ? m.antennaCount : 0) + "</td>" +
+        "<td>" + (m.formFactor ? escapeHtml(m.formFactor) : ruleNo()) + "</td>" +
+        "</tr>";
+    });
+    if (!(catalog.internalModems || []).length) html += "<tr><td colspan='3' class='mx-empty'>None yet.</td></tr>";
+    html += "</tbody></table></div></div>";
+
+    // External modems
+    html += "<div class='matrix-section'><h3 class='matrix-title'>External LTE modems</h3><div class='matrix-scroll'>" +
+      "<table class='matrix'><thead><tr>" +
+      "<th>Modem</th><th>Requires&nbsp;external&nbsp;antenna</th>" +
+      "</tr></thead><tbody>";
+    (catalog.externalModems || []).forEach(function (m) {
+      html += "<tr><td class='mx-name'>" + escapeHtml(m.name) + srcTag(m) + "</td><td>" + ruleYes() + "</td></tr>";
+    });
+    if (!(catalog.externalModems || []).length) html += "<tr><td colspan='2' class='mx-empty'>None yet.</td></tr>";
+    html += "</tbody></table></div></div>";
+
+    host.innerHTML = html;
   }
 
   // ---- Toast ---------------------------------------------------------------

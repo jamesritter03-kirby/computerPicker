@@ -14,6 +14,7 @@
         <p class="subtitle">Answer the questions to generate a purchasing list (bill of materials).</p>
       </div>
       <div class="header-actions">
+        <button id="btn-matrix" class="btn btn-secondary" type="button">Rules Matrix</button>
         <button id="btn-manage" class="btn btn-secondary" type="button">Manage / Add Options</button>
         <button id="btn-reset" class="btn btn-ghost" type="button">Reset</button>
       </div>
@@ -115,6 +116,25 @@
             </label>
           </div>
 
+          <!-- Computer rules -->
+          <div class="form-row cat-only" data-cat="computers">
+            <label>Forces modem type (rule)
+              <select id="f-force-modem">
+                <option value="">No — let the user choose</option>
+                <option value="internal">Internal LTE (auto-select, skip Connectivity)</option>
+                <option value="external">External modem (auto-select, skip Connectivity)</option>
+              </select>
+            </label>
+            <label>Internal modem form factor
+              <input id="f-internal-ff" type="text" placeholder="mPCIe / M.2 (optional)" />
+            </label>
+          </div>
+          <div class="form-row cat-only" data-cat="computers">
+            <label class="checkbox">
+              <input id="f-requires-sd" type="checkbox" /> Requires SD card (auto-select storage, make step required)
+            </label>
+          </div>
+
           <!-- Internal modem-specific -->
           <div class="form-row cat-only" data-cat="internalModems">
             <label>Antennas needed (bulkhead cables)
@@ -136,6 +156,21 @@
 
         <h3>Existing options</h3>
         <div id="manage-list" class="manage-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES MATRIX MODAL -->
+  <div id="matrix-modal" class="modal hidden">
+    <div class="modal-backdrop" data-close="matrix"></div>
+    <div class="modal-card matrix-card">
+      <div class="modal-head">
+        <h2>Master Rules Matrix</h2>
+        <button class="modal-close" data-close="matrix" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="hint">Every option and the configuration rules that apply to it. Rules control how the wizard auto-selects modems and skips steps.</p>
+        <div id="matrix-body"></div>
       </div>
     </div>
   </div>
