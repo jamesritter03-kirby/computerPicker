@@ -651,6 +651,38 @@
     viewerStatus.classList.remove("hidden");
   }
 
+  // Fully release the WebGL context and GPU buffers of the current model.
+  // iOS Safari enforces a strict per-page GPU budget, so reusing one context
+  // across several CAD models exhausts it and later models render blank/white.
+  // Tearing the viewer down between models guarantees each opens into a fresh
+  // context with the previous model's memory reclaimed.
+  function destroyViewer() {
+    if (embeddedViewer) {
+      try {
+        var viewer = embeddedViewer.GetViewer && embeddedViewer.GetViewer();
+        var renderer = viewer && viewer.renderer;
+        if (renderer) {
+          if (renderer.dispose) renderer.dispose();
+          if (renderer.forceContextLoss) renderer.forceContextLoss();
+        }
+      } catch (e) { /* best-effort cleanup */ }
+      embeddedViewer = null;
+    }
+    // Remove any canvas O3DV created and explicitly lose its GL context.
+    if (viewerCanvas) {
+      var canvas;
+      while ((canvas = viewerCanvas.querySelector("canvas"))) {
+        try {
+          var gl = canvas.getContext("webgl2") || canvas.getContext("webgl");
+          var ext = gl && gl.getExtension("WEBGL_lose_context");
+          if (ext) ext.loseContext();
+        } catch (e) { /* ignore */ }
+        canvas.parentNode.removeChild(canvas);
+      }
+      viewerCanvas.innerHTML = "";
+    }
+  }
+
   function openViewer(url, title) {
     viewerTitle.textContent = title ? (title + " \u2014 3D model") : "3D model";
     viewerOpen.href = url;
@@ -665,13 +697,13 @@
       return;
     }
 
-    if (!embeddedViewer) {
-      embeddedViewer = new OV.EmbeddedViewer(viewerCanvas, {
-        backgroundColor: new OV.RGBAColor(232, 235, 242, 255),
-        defaultColor: new OV.RGBColor(150, 160, 180),
-        edgeSettings: new OV.EdgeSettings(false, new OV.RGBColor(40, 46, 60), 40)
-      });
-    }
+    // Always start from a clean context so GPU memory never accumulates on iOS.
+    destroyViewer();
+    embeddedViewer = new OV.EmbeddedViewer(viewerCanvas, {
+      backgroundColor: new OV.RGBAColor(232, 235, 242, 255),
+      defaultColor: new OV.RGBColor(150, 160, 180),
+      edgeSettings: new OV.EdgeSettings(false, new OV.RGBColor(40, 46, 60), 40)
+    });
     setViewerStatus("Loading model\u2026 large CAD files can take a few seconds.");
     embeddedViewer.LoadModelFromUrlList([url]);
     // Clear the loading message once geometry appears (or after a timeout).
@@ -684,6 +716,7 @@
   }
   function closeViewer() {
     viewerModal.classList.add("hidden");
+    destroyViewer();
   }
   document.querySelectorAll("[data-close='viewer']").forEach(function (el) {
     el.addEventListener("click", closeViewer);
