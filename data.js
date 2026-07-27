@@ -202,7 +202,7 @@ window.DEFAULT_CATALOG = {
       vendorUrl: "",
       partNumber: "",
       price: null,
-      imageUrl: "https://m.media-amazon.com/images/I/71ojeUPQI9L._AC_SY355_.jpg",
+      imageUrl: "images/sd-industrial-128gb/sandisk-128gb.jpg",
       modelUrl: "",
       notes: "Industrial-grade microSD for use in computers with an SD slot."
     }
